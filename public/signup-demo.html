@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banking System - Signup Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: white;
+            color: #2c3e50;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .response.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .response.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .address-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .address-group h4 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .info-box h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+            color: #424242;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 Banking System</h1>
+            <p>Secure Registration Portal</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('customer')">Customer Signup</button>
+            <button class="tab" onclick="showTab('employee')">Employee Signup</button>
+            <button class="tab" onclick="showTab('admin')">Admin Signup</button>
+        </div>
+
+        <div class="form-container">
+            <!-- Customer Signup Form -->
+            <div id="customer" class="form-section active">
+                <div class="info-box">
+                    <h4>Customer Registration</h4>
+                    <ul>
+                        <li>Open a new bank account</li>
+                        <li>Email verification required</li>
+                        <li>KYC process will follow</li>
+                        <li>Instant account activation after verification</li>
+                    </ul>
+                </div>
+
+                <form id="customerForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerFirstName">First Name *</label>
+                            <input type="text" id="customerFirstName" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerLastName">Last Name *</label>
+                            <input type="text" id="customerLastName" name="lastName" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerEmail">Email Address *</label>
+                            <input type="email" id="customerEmail" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone">Phone Number *</label>
+                            <input type="tel" id="customerPhone" name="phoneNumber" placeholder="+1234567890" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerPassword">Password *</label>
+                            <input type="password" id="customerPassword" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerConfirmPassword">Confirm Password *</label>
+                            <input type="password" id="customerConfirmPassword" name="confirmPassword" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerDOB">Date of Birth *</label>
+                        <input type="date" id="customerDOB" name="dateOfBirth" required>
+                    </div>
+
+                    <div class="address-group">
+                        <h4>Address Information</h4>
+                        <div class="form-group">
+                            <label for="customerStreet">Street Address *</label>
+                            <input type="text" id="customerStreet" name="address.street" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="customerCity">City *</label>
+                                <input type="text" id="customerCity" name="address.city" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerState">State *</label>
+                                <input type="text" id="customerState" name="address.state" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="customerZip">ZIP Code *</label>
+                                <input type="text" id="customerZip" name="address.zipCode" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerCountry">Country *</label>
+                                <input type="text" id="customerCountry" name="address.country" value="USA" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerOccupation">Occupation *</label>
+                            <input type="text" id="customerOccupation" name="occupation" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerIncome">Annual Income *</label>
+                            <input type="number" id="customerIncome" name="annualIncome" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerIdType">Identification Type *</label>
+                            <select id="customerIdType" name="identificationType" required>
+                                <option value="">Select ID Type</option>
+                                <option value="ssn">Social Security Number</option>
+                                <option value="passport">Passport</option>
+                                <option value="driver_license">Driver's License</option>
+                                <option value="national_id">National ID</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerIdNumber">Identification Number *</label>
+                            <input type="text" id="customerIdNumber" name="identificationNumber" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">Create Customer Account</button>
+                </form>
+
+                <div id="customerResponse" class="response"></div>
+            </div>
+
+            <!-- Employee Signup Form -->
+            <div id="employee" class="form-section">
+                <div class="info-box">
+                    <h4>Employee Registration</h4>
+                    <ul>
+                        <li>For bank staff members</li>
+                        <li>Requires admin approval</li>
+                        <li>Role assigned based on department</li>
+                        <li>Email verification after approval</li>
+                    </ul>
+                </div>
+
+                <form id="employeeForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employeeFirstName">First Name *</label>
+                            <input type="text" id="employeeFirstName" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employeeLastName">Last Name *</label>
+                            <input type="text" id="employeeLastName" name="lastName" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employeeEmail">Email Address *</label>
+                            <input type="email" id="employeeEmail" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employeePhone">Phone Number *</label>
+                            <input type="tel" id="employeePhone" name="phoneNumber" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employeePassword">Password *</label>
+                            <input type="password" id="employeePassword" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employeeConfirmPassword">Confirm Password *</label>
+                            <input type="password" id="employeeConfirmPassword" name="confirmPassword" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employeeDOB">Date of Birth *</label>
+                        <input type="date" id="employeeDOB" name="dateOfBirth" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employeeId">Employee ID *</label>
+                            <input type="text" id="employeeId" name="employeeId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employeeStartDate">Start Date *</label>
+                            <input type="date" id="employeeStartDate" name="startDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employeeDepartment">Department *</label>
+                            <select id="employeeDepartment" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="Operations">Operations</option>
+                                <option value="Compliance">Compliance</option>
+                                <option value="Risk Management">Risk Management</option>
+                                <option value="IT">IT</option>
+                                <option value="Customer Service">Customer Service</option>
+                                <option value="Finance">Finance</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="employeePosition">Position *</label>
+                            <select id="employeePosition" name="position" required>
+                                <option value="">Select Position</option>
+                                <option value="Bank Officer">Bank Officer</option>
+                                <option value="Senior Bank Officer">Senior Bank Officer</option>
+                                <option value="Branch Manager">Branch Manager</option>
+                                <option value="Compliance Officer">Compliance Officer</option>
+                                <option value="Risk Analyst">Risk Analyst</option>
+                                <option value="System Administrator">System Administrator</option>
+                                <option value="Developer">Developer</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employeeManagerId">Manager ID (Optional)</label>
+                        <input type="text" id="employeeManagerId" name="managerId">
+                    </div>
+
+                    <button type="submit" class="btn">Submit Employee Application</button>
+                </form>
+
+                <div id="employeeResponse" class="response"></div>
+            </div>
+
+            <!-- Admin Signup Form -->
+            <div id="admin" class="form-section">
+                <div class="info-box">
+                    <h4>Admin Registration</h4>
+                    <ul>
+                        <li>Requires existing admin privileges</li>
+                        <li>Login first to create admin accounts</li>
+                        <li>Different admin levels available</li>
+                        <li>Immediate access after verification</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label for="adminToken">Admin Token (Login first) *</label>
+                    <input type="text" id="adminToken" placeholder="Paste your JWT token here" required>
+                    <button type="button" onclick="loginAsAdmin()" class="btn" style="margin-top: 10px;">Login as Admin First</button>
+                </div>
+
+                <form id="adminForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminFirstName">First Name *</label>
+                            <input type="text" id="adminFirstName" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminLastName">Last Name *</label>
+                            <input type="text" id="adminLastName" name="lastName" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminEmail">Email Address *</label>
+                            <input type="email" id="adminEmail" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminPhone">Phone Number *</label>
+                            <input type="tel" id="adminPhone" name="phoneNumber" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminPassword">Password *</label>
+                            <input type="password" id="adminPassword" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminConfirmPassword">Confirm Password *</label>
+                            <input type="password" id="adminConfirmPassword" name="confirmPassword" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adminDOB">Date of Birth *</label>
+                        <input type="date" id="adminDOB" name="dateOfBirth" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminEmployeeId">Employee ID *</label>
+                            <input type="text" id="adminEmployeeId" name="employeeId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminDepartment">Department *</label>
+                            <select id="adminDepartment" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="IT">IT</option>
+                                <option value="Operations">Operations</option>
+                                <option value="Compliance">Compliance</option>
+                                <option value="Management">Management</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adminLevel">Admin Level *</label>
+                        <select id="adminLevel" name="adminLevel" required>
+                            <option value="">Select Admin Level</option>
+                            <option value="department_admin">Department Admin</option>
+                            <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn">Create Admin Account</button>
+                </form>
+
+                <div id="adminResponse" class="response"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api/auth';
+
+        function showTab(tabName) {
+            // Hide all form sections
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected form section
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        function showResponse(elementId, message, isSuccess) {
+            const responseEl = document.getElementById(elementId);
+            responseEl.textContent = message;
+            responseEl.className = `response ${isSuccess ? 'success' : 'error'}`;
+            responseEl.style.display = 'block';
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                responseEl.style.display = 'none';
+            }, 10000);
+        }
+
+        function getFormData(form) {
+            const formData = new FormData(form);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('.')) {
+                    const keys = key.split('.');
+                    if (!data[keys[0]]) data[keys[0]] = {};
+                    data[keys[0]][keys[1]] = value;
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            return data;
+        }
+
+        async function submitForm(endpoint, data, responseElementId, token = null) {
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showResponse(responseElementId, result.message, true);
+                    if (result.verificationToken) {
+                        showResponse(responseElementId, 
+                            result.message + `\\n\\nVerification Token: ${result.verificationToken}\\n(In production, this would be sent via email)`, 
+                            true
+                        );
+                    }
+                } else {
+                    showResponse(responseElementId, result.error || 'An error occurred', false);
+                }
+            } catch (error) {
+                showResponse(responseElementId, `Network error: ${error.message}`, false);
+            }
+        }
+
+        async function loginAsAdmin() {
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@bank.com',
+                        password: 'Admin@123'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    document.getElementById('adminToken').value = result.token;
+                    showResponse('adminResponse', 'Admin login successful! Token has been filled automatically.', true);
+                } else {
+                    showResponse('adminResponse', result.error || 'Login failed', false);
+                }
+            } catch (error) {
+                showResponse('adminResponse', `Login error: ${error.message}`, false);
+            }
+        }
+
+        // Form submissions
+        document.getElementById('customerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = getFormData(e.target);
+            await submitForm('/signup/customer', data, 'customerResponse');
+        });
+
+        document.getElementById('employeeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = getFormData(e.target);
+            await submitForm('/signup/employee', data, 'employeeResponse');
+        });
+
+        document.getElementById('adminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = getFormData(e.target);
+            const token = document.getElementById('adminToken').value;
+            
+            if (!token) {
+                showResponse('adminResponse', 'Please login as admin first to get a token', false);
+                return;
+            }
+            
+            await submitForm('/signup/admin', data, 'adminResponse', token);
+        });
+
+        // Password validation
+        function validatePassword(password) {
+            const minLength = password.length >= 8;
+            const hasLower = /[a-z]/.test(password);
+            const hasUpper = /[A-Z]/.test(password);
+            const hasNumber = /\\d/.test(password);
+            const hasSpecial = /[!@#$%^&*]/.test(password);
+            
+            return minLength && hasLower && hasUpper && hasNumber && hasSpecial;
+        }
+
+        // Add password validation feedback
+        document.querySelectorAll('input[type="password"]').forEach(input => {
+            if (input.name === 'password') {
+                input.addEventListener('input', (e) => {
+                    const isValid = validatePassword(e.target.value);
+                    e.target.style.borderColor = isValid ? '#28a745' : '#dc3545';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
