@@ -9,7 +9,10 @@ This guide provides comprehensive instructions for deploying the Banking Process
 - [Development Deployment](#development-deployment)
 - [Docker Deployment](#docker-deployment)
 - [Kubernetes Deployment](#kubernetes-deployment)
+- [Database Setup](#database-setup)
+- [Email Configuration](#email-configuration)
 - [Monitoring and Logging](#monitoring-and-logging)
+- [Security Configuration](#security-configuration)
 - [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
@@ -18,11 +21,11 @@ This guide provides comprehensive instructions for deploying the Banking Process
 
 - **Node.js**: Version 18 or later
 - **npm**: Version 9 or later
+- **PostgreSQL**: Version 15 or later (or Docker)
 - **Docker**: Version 20.10 or later (for containerized deployment)
-- **Docker Compose**: Version 2.0 or later (for local development)
+- **Docker Compose**: Version 2.0 or later
 - **kubectl**: Version 1.25 or later (for Kubernetes deployment)
-- **PostgreSQL**: Version 15 or later (if not using Docker)
-- **Redis**: Version 7 or later (if not using Docker)
+- **Redis**: Version 7 or later (optional, for caching)
 
 ### System Requirements
 
@@ -42,25 +45,40 @@ This guide provides comprehensive instructions for deploying the Banking Process
 
 The system uses environment-based configuration. Create appropriate `.env` files for each environment:
 
-#### Development (.env or .env.development)
+#### Development (.env)
 ```bash
 NODE_ENV=development
 PORT=3000
 HOST=localhost
 
-# Database
+# Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=banking_automation_dev
 DB_USERNAME=banking_user
 DB_PASSWORD=banking_password
+DB_SSL=false
 
-# Redis
+# Redis Configuration (optional)
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
 # Security
-JWT_SECRET=development-jwt-secret
+JWT_SECRET=development-jwt-secret-change-in-production
+BCRYPT_ROUNDS=10
+
+# Email Configuration (development mode - logs to console)
+EMAIL_PROVIDER=console
+EMAIL_FROM=noreply@yourbank.com
+EMAIL_FROM_NAME=Your Bank Name
+
+# Rate Limiting
+RATE_LIMIT_WINDOW=900000
+RATE_LIMIT_MAX=100
+
+# Logging
+LOG_LEVEL=info
+AUDIT_LOGGING=true
 ```
 
 #### Production (.env.production)
@@ -69,27 +87,49 @@ NODE_ENV=production
 PORT=8080
 HOST=0.0.0.0
 
-# Database (use actual production values)
+# Database Configuration
 DB_HOST=prod-postgres.example.com
 DB_PORT=5432
 DB_NAME=banking_automation
 DB_USERNAME=banking_prod_user
 DB_PASSWORD=<secure-password>
 DB_SSL=true
+DB_POOL_SIZE=20
 
-# Redis
+# Redis Configuration
 REDIS_HOST=prod-redis.example.com
 REDIS_PORT=6379
 REDIS_PASSWORD=<secure-password>
 
 # Security
-JWT_SECRET=<generate-secure-secret>
+JWT_SECRET=<generate-secure-secret-minimum-32-characters>
 BCRYPT_ROUNDS=14
 
-# External Services
+# Email Configuration (SMTP)
+EMAIL_PROVIDER=smtp
+EMAIL_FROM=noreply@yourbank.com
+EMAIL_FROM_NAME=Your Bank Name
+SMTP_HOST=smtp.yourprovider.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-smtp-username
+SMTP_PASSWORD=your-smtp-password
+
+# Rate Limiting (stricter in production)
+RATE_LIMIT_WINDOW=900000
+RATE_LIMIT_MAX=50
+
+# Logging
+LOG_LEVEL=warn
+AUDIT_LOGGING=true
+AUDIT_RETENTION_DAYS=2555
+
+# CORS
+CORS_ORIGINS=https://yourbank.com,https://app.yourbank.com
+
+# External Services (add your actual API keys)
 CIBIL_API_URL=https://api.cibil.com
 CIBIL_API_KEY=<your-api-key>
-# ... (add all external service configurations)
 ```
 
 ### Configuration Validation
@@ -500,6 +540,188 @@ Never commit secrets to version control. Use:
 - HashiCorp Vault
 - Azure Key Vault
 - Environment variables (for development only)
+
+## Backup and Recovery
+
+### Database Backup
+
+```bash
+# Docker
+docker-compose exec postgres pg_dump -U banking_user banking_automation > backup.sql
+
+# Kubernetes
+kubectl exec -it postgres-statefulset-0 -n banking-automation -- \
+  pg_dump -U banking_user banking_automation > backup.sql
+```
+
+### Restore Database
+
+```bash
+# Docker
+docker-compose exec -T postgres psql -U banking_user banking_automation < backup.sql
+
+# Kubernetes
+kubectl exec -i postgres-statefulset-0 -n banking-automation -- \
+  psql -U banking_user banking_automation < backup.sql
+```
+
+## Maintenance
+
+### Updating Dependencies
+
+```bash
+# Check for updates
+npm outdated
+
+# Update dependencies
+npm update
+
+# Update to latest versions
+npm install <package>@latest
+```
+
+### Database Migrations
+
+```bash
+# Run migrations
+npm run migrate
+
+# Rollback migration
+npm run migrate:rollback
+```
+
+## Support
+
+For issues, questions, or contributions:
+- Create an issue in the repository
+- Contact the development team
+- Review the API documentation
+
+## Database Setup
+
+### PostgreSQL Configuration
+
+#### Development Setup
+
+```bash
+# Using Docker
+docker run --name postgres-banking \
+  -e POSTGRES_DB=banking_automation_dev \
+  -e POSTGRES_USER=banking_user \
+  -e POSTGRES_PASSWORD=banking_password \
+  -p 5432:5432 \
+  -d postgres:15
+```
+
+#### Production Setup
+
+1. **Install PostgreSQL**
+2. **Create database and user**
+3. **Configure connection pooling**
+4. **Set up backups**
+5. **Configure SSL**
+
+### Database Migrations
+
+Migrations run automatically on application startup:
+
+```bash
+# Migrations are located in database/migrations/
+# They execute in filename order:
+# - 001_create_users_table.sql
+
+# To run migrations manually:
+node -e "require('./src/database/connection').runMigrations()"
+```
+
+### Default Users
+
+The system creates default users on first migration:
+
+**Admin User**
+- Email: `admin@bank.com`
+- Password: `Admin@123`
+- Role: `admin`
+
+**Bank Officer**
+- Email: `officer@bank.com`
+- Password: `Officer@123`
+- Role: `bank_officer`
+
+## Email Configuration
+
+### Development Mode (Default)
+
+```bash
+EMAIL_PROVIDER=console
+```
+- Emails are logged to console
+- No external service required
+- Perfect for development and testing
+
+### SMTP Configuration
+
+```bash
+EMAIL_PROVIDER=smtp
+EMAIL_FROM=noreply@yourbank.com
+EMAIL_FROM_NAME=Your Bank Name
+SMTP_HOST=smtp.yourprovider.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-smtp-username
+SMTP_PASSWORD=your-smtp-password
+```
+
+### Gmail Configuration
+
+```bash
+EMAIL_PROVIDER=gmail
+EMAIL_FROM=noreply@yourbank.com
+EMAIL_FROM_NAME=Your Bank Name
+GMAIL_USER=your-gmail@gmail.com
+GMAIL_PASSWORD=your-app-password
+```
+
+### Testing Email Configuration
+
+```bash
+# Test email functionality
+npm run test:email
+```
+
+## Security Configuration
+
+### Production Security Checklist
+
+- [ ] Change all default passwords and secrets
+- [ ] Set strong JWT_SECRET (minimum 32 characters)
+- [ ] Enable SSL/TLS for all connections
+- [ ] Configure firewall rules
+- [ ] Enable audit logging
+- [ ] Set up monitoring and alerting
+- [ ] Configure backup and disaster recovery
+- [ ] Review and update security headers
+- [ ] Enable rate limiting
+- [ ] Configure CORS properly
+- [ ] Use secrets management (Vault, AWS Secrets Manager, etc.)
+
+### Secrets Management
+
+Never commit secrets to version control. Use:
+- Kubernetes Secrets
+- AWS Secrets Manager
+- HashiCorp Vault
+- Azure Key Vault
+- Environment variables (for development only)
+
+### Password Requirements
+
+The system enforces:
+- Minimum 8 characters
+- At least one lowercase letter (a-z)
+- At least one uppercase letter (A-Z)
+- At least one number (0-9)
+- At least one special character (!@#$%^&*)
 
 ## Backup and Recovery
 

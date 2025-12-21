@@ -53,7 +53,7 @@ class AuthModule {
           employeeId: Joi.string().required(),
           department: Joi.string().required(),
           position: Joi.string().required(),
-          managerId: Joi.string().optional(),
+          managerId: Joi.string().uuid().optional().allow(null, ''),
           startDate: Joi.date().required()
         });
 
@@ -750,7 +750,6 @@ class AuthModule {
   // Reset password request
   async requestPasswordReset(email) {
     await this.initializeDatabase();
-    
     // Find user by email (don't reveal if email exists)
     const user = await db.queryOne(
       'SELECT id FROM users WHERE email = $1',
@@ -776,7 +775,12 @@ class AuthModule {
       
       // Send password reset email
       try {
-        await emailService.sendPasswordReset(fullUser, token);
+        const res = await emailService.sendPasswordReset(fullUser, token);
+        return {
+          success: true,
+          message: 'Password reset link has been sent to your email.',
+          // resetToken: token // In production, this would not be returned
+        };
       } catch (emailError) {
         console.error('Failed to send password reset email:', emailError);
         // Don't fail the request if email fails
@@ -786,18 +790,13 @@ class AuthModule {
         }
       }
       
-      return {
-        success: true,
-        message: 'Password reset link has been sent to your email.',
-        resetToken: token // In production, this would not be returned
-      };
     }
     
     // Don't reveal if email exists
-    return {
-      success: true,
-      message: 'If the email exists, a password reset link has been sent.'
-    };
+    // return {
+    //   success: true,
+    //   message: 'If the email exists, a password reset link has been sent.'
+    // };
   }
 
   // Reset password

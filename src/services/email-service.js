@@ -17,7 +17,7 @@ class EmailService {
   initialize() {
     try {
       const emailConfig = this.getEmailConfig();
-      
+      // console.log(emailConfig);
       if (emailConfig.provider === 'mock' || config.isDevelopment()) {
         // Use mock transporter for development
         this.transporter = nodemailer.createTransport({
@@ -40,7 +40,7 @@ class EmailService {
         console.log('Email service initialized with SMTP transporter');
       } else if (emailConfig.provider === 'gmail') {
         // Use Gmail for production
-        this.transporter = nodemailer.createTransporter({
+        this.transporter = nodemailer.createTransport({
           service: 'gmail',
           auth: {
             user: emailConfig.gmail.user,
@@ -108,7 +108,7 @@ class EmailService {
    */
   async sendCustomerVerification(user, verificationToken) {
     const emailConfig = this.getEmailConfig();
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${verificationToken}`;
     
     const mailOptions = {
       from: `"${emailConfig.fromName}" <${emailConfig.fromAddress}>`,
@@ -137,7 +137,7 @@ class EmailService {
    */
   async sendEmployeeVerification(user, verificationToken) {
     const emailConfig = this.getEmailConfig();
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${verificationToken}`;
     
     const mailOptions = {
       from: `"${emailConfig.fromName}" <${emailConfig.fromAddress}>`,
@@ -194,8 +194,9 @@ class EmailService {
    * Send password reset email
    */
   async sendPasswordReset(user, resetToken) {
+    console.log("send password reset start")
     const emailConfig = this.getEmailConfig();
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/api/auth/reset-password?token=${resetToken}`;
     
     const mailOptions = {
       from: `"${emailConfig.fromName}" <${emailConfig.fromAddress}>`,
@@ -575,7 +576,7 @@ If you have any questions or need assistance, please contact your supervisor or 
                 <h2>Password Reset Request</h2>
             </div>
             <div class="content">
-                <h3>Hello ${user.firstName} ${user.lastName},</h3>
+                <h3>Hello ${user.first_name} ${user.last_name},</h3>
                 <p>We received a request to reset the password for your Banking System account.</p>
                 
                 <div class="warning">
@@ -620,7 +621,7 @@ If you have any questions or need assistance, please contact your supervisor or 
     return `
 Banking System - Password Reset Request
 
-Hello ${user.firstName} ${user.lastName},
+Hello ${user.first_name} ${user.last_name},
 
 We received a request to reset the password for your Banking System account.
 

@@ -11,23 +11,57 @@ The system supports three types of user registrations with comprehensive email v
 
 Each user type has different validation requirements, approval processes, and access levels. All signups include automated email notifications for verification and status updates.
 
+## Current Implementation Status
+
+✅ **Implemented Features:**
+- Complete authentication system with PostgreSQL database
+- Multi-tier user registration (customer, employee, admin)
+- Email verification system with token management
+- Password reset functionality
+- Admin approval workflow for employees
+- Role-based access control
+- Comprehensive input validation
+- Rate limiting and security measures
+- Audit logging for all authentication events
+
+✅ **Database Schema:**
+- Users table with comprehensive fields
+- Email verification tokens table
+- Password reset tokens table
+- User sessions table for JWT management
+- Proper indexing and constraints
+
+✅ **Email System:**
+- Development mode (console logging)
+- Production SMTP support
+- Gmail integration
+- Professional email templates
+- Token expiration handling
+
 ## API Endpoints
 
 ### Base URL
 ```
-POST /api/auth/signup/{userType}
+POST /api/auth/api/auth/signup/{userType}
 ```
 
 ### Available Endpoints
-- `POST /api/auth/signup/customer` - Customer registration
-- `POST /api/auth/signup/employee` - Employee registration  
-- `POST /api/auth/signup/admin` - Admin registration (requires admin privileges)
+- `POST /api/auth/api/auth/signup/customer` - Customer registration
+- `POST /api/auth/api/auth/signup/employee` - Employee registration  
+- `POST /api/auth/api/auth/signup/admin` - Admin registration (requires admin privileges)
+- `POST /api/auth/login` - User login
+- `POST /api/auth/api/auth/verify-email` - Email verification
+- `POST /api/auth/password-reset/request` - Request password reset
+- `POST /api/auth/password-reset/confirm` - Confirm password reset
+- `GET /api/auth/users` - Get all users (admin only)
+- `POST /api/auth/users/:userId/approve` - Approve user (admin only)
+- `GET /api/auth/pending-approvals` - Get pending approvals (admin only)
 
 ## 1. Customer Signup
 
 ### Endpoint
 ```
-POST /api/auth/signup/customer
+POST /api/auth/api/auth/signup/customer
 ```
 
 ### Request Body
@@ -96,7 +130,7 @@ POST /api/auth/signup/customer
 
 ### Endpoint
 ```
-POST /api/auth/signup/employee
+POST /api/auth/api/auth/signup/employee
 ```
 
 ### Request Body
@@ -112,16 +146,19 @@ POST /api/auth/signup/employee
   "employeeId": "EMP001",
   "department": "Operations",
   "position": "Bank Officer",
-  "managerId": "MGR001",
+  "managerId": "9b7d088b-0f76-499f-94cc-15611ab400ec",
   "startDate": "2024-01-15"
 }
 ```
+
+**Note:** The `managerId` field is optional and should be a valid UUID of an existing user if provided. You can omit this field or set it to `null` if the employee doesn't have a manager yet.
 
 ### Validation Rules
 - All basic validation rules apply
 - **Employee ID**: Required, unique
 - **Department**: Required
 - **Position**: Required
+- **Manager ID**: Optional, must be a valid UUID of an existing user if provided
 - **Start Date**: Required
 
 ### Process Flow
@@ -177,7 +214,7 @@ Based on department and position:
 
 ### Endpoint
 ```
-POST /api/auth/signup/admin
+POST /api/auth/api/auth/signup/admin
 ```
 
 ### Authentication Required
@@ -301,11 +338,73 @@ The system includes professionally designed email templates for:
    - Login button and instructions
    - Support information
 
+### Login Interface
+
+The system includes a comprehensive login interface that provides:
+
+**Features:**
+- **User Type Tabs**: Switch between Customer, Employee, and Admin login modes
+- **Demo Accounts**: Pre-filled demo credentials for easy testing in development
+- **Password Visibility Toggle**: Show/hide password functionality
+- **Remember Me**: Persistent login sessions using localStorage
+- **Forgot Password**: Direct link to password reset functionality
+- **Real-time Validation**: Client-side form validation with user feedback
+- **Role-based Redirects**: Automatic redirection based on user role after login
+- **Account Status Handling**: Contextual messages for pending verification/approval
+
+**Demo Accounts (Development Mode):**
+- **Admin**: admin@bank.com / Admin@123
+- **Customer**: customer@example.com / Customer@123  
+- **Employee**: employee@bank.com / Employee@123
+
+**Login Flow:**
+1. User selects account type (Customer/Employee/Admin)
+2. User enters credentials or clicks demo account to auto-fill
+3. System validates credentials and account status
+4. JWT token generated and stored (localStorage or sessionStorage)
+5. User redirected to appropriate dashboard based on role
+6. Session management handles token expiration and refresh
+
 ### Email Verification URLs
 
-- **Verification Page**: `http://localhost:3000/verify-email?token=<TOKEN>`
-- **Password Reset**: `http://localhost:3000/reset-password?token=<TOKEN>`
 - **Login Page**: `http://localhost:3000/login`
+- **Verification Page**: `http://localhost:3000/verify-email?token=<TOKEN>`
+- **Password Reset Page**: `http://localhost:3000/reset-password?token=<TOKEN>`
+
+### Password Reset Interface
+
+The system includes a user-friendly password reset interface that:
+- Validates the reset token from the URL
+- Provides real-time password strength validation
+- Shows password requirements with visual feedback
+- Confirms password match before submission
+- Handles expired tokens gracefully
+- Redirects to login after successful reset
+
+**Password Requirements:**
+- Minimum 8 characters
+- At least one lowercase letter (a-z)
+- At least one uppercase letter (A-Z)
+- At least one number (0-9)
+- At least one special character (!@#$%^&*)
+- Passwords must match
+
+### Testing Login Functionality
+
+Use the test script to verify login functionality:
+
+```bash
+npm run test:login
+```
+
+This comprehensive test will:
+- Test admin login with valid credentials
+- Test login with invalid credentials
+- Test login with non-existent user
+- Test token validation with protected endpoints
+- Test different user types (customer, employee, admin)
+- Test missing field validation
+- Test account status handling
 
 ### Testing Email Verification
 
@@ -315,12 +414,81 @@ Use the test script to verify email functionality:
 npm run test:email
 ```
 
-This will test:
-- Customer signup with email verification
-- Employee signup with email verification
-- Admin approval process with notifications
-- Password reset email flow
-- Email template rendering
+This comprehensive test will:
+- Test customer signup with email verification
+- Test employee signup with email verification
+- Test admin login and employee approval process
+- Test password reset email flow
+- Test email template rendering
+- Test invalid token handling
+
+### Test Results
+
+The test script provides detailed output showing:
+- ✅ Successful operations
+- 📧 Email notifications that would be sent
+- 🔗 Verification tokens (in development mode)
+- ⏳ Status updates and workflow progression
+- ❌ Error handling for invalid inputs
+
+## Database Schema
+
+### Users Table
+
+The system uses a comprehensive PostgreSQL schema with the following key tables:
+
+**users** - Main user table with:
+- UUID primary key
+- Personal information (name, phone, date of birth)
+- Authentication data (email, password hash)
+- Role and status management
+- Employee-specific fields (employee ID, department, position)
+- Customer-specific fields (address, occupation, income, KYC status)
+- Admin-specific fields (admin level, permissions)
+- Audit fields (created/updated timestamps, approval tracking)
+
+**email_verification_tokens** - Email verification management:
+- Token generation and expiration
+- Token type support (email verification, password reset)
+- Usage tracking
+
+**password_reset_tokens** - Password reset functionality:
+- Secure token generation
+- Expiration handling
+- One-time use enforcement
+
+**user_sessions** - JWT session management:
+- Token hash storage
+- Session tracking
+- IP and user agent logging
+
+### User Roles and Statuses
+
+**User Roles:**
+- `customer` - Bank customers
+- `employee` - General employees
+- `bank_officer` - Bank officers
+- `senior_bank_officer` - Senior bank officers
+- `branch_manager` - Branch managers
+- `compliance_officer` - Compliance officers
+- `senior_compliance_officer` - Senior compliance officers
+- `compliance_manager` - Compliance managers
+- `risk_analyst` - Risk analysts
+- `risk_manager` - Risk managers
+- `system_admin` - System administrators
+- `developer` - Developers
+- `it_manager` - IT managers
+- `department_admin` - Department administrators
+- `admin` - General administrators
+- `super_admin` - Super administrators
+
+**User Statuses:**
+- `pending_verification` - Email verification required
+- `pending_approval` - Admin approval required
+- `active` - User can access the system
+- `inactive` - User account disabled
+- `suspended` - User account temporarily suspended
+- `locked` - User account locked
 
 ## Additional Authentication Endpoints
 
@@ -338,7 +506,7 @@ POST /api/auth/login
 
 ### Email Verification
 ```
-POST /api/auth/verify-email
+POST /api/auth/api/auth/verify-email
 ```
 
 ```json
@@ -467,7 +635,7 @@ GET /api/auth/pending-approvals
 
 ### 1. Test Customer Signup
 ```bash
-curl -X POST http://localhost:3000/api/auth/signup/customer \
+curl -X POST http://localhost:3000/api/auth/api/auth/signup/customer \
   -H "Content-Type: application/json" \
   -d '{
     "email": "testcustomer@example.com",
@@ -493,7 +661,7 @@ curl -X POST http://localhost:3000/api/auth/signup/customer \
 
 ### 2. Test Employee Signup
 ```bash
-curl -X POST http://localhost:3000/api/auth/signup/employee \
+curl -X POST http://localhost:3000/api/auth/api/auth/signup/employee \
   -H "Content-Type: application/json" \
   -d '{
     "email": "testemployee@bank.com",
@@ -521,7 +689,7 @@ curl -X POST http://localhost:3000/api/auth/login \
   }'
 
 # Then create new admin (use token from login response)
-curl -X POST http://localhost:3000/api/auth/signup/admin \
+curl -X POST http://localhost:3000/api/auth/api/auth/signup/admin \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{

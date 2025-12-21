@@ -57,7 +57,7 @@ const signupRateLimit = rateLimit({
 // Public routes (no authentication required)
 
 // Customer signup
-router.post('/signup/customer', signupRateLimit, async (req, res) => {
+router.post('/api/auth/signup/customer', signupRateLimit, async (req, res) => {
   try {
     const result = await authModule.signupCustomer(req.body);
     res.status(201).json(result);
@@ -71,7 +71,7 @@ router.post('/signup/customer', signupRateLimit, async (req, res) => {
 });
 
 // Employee signup
-router.post('/signup/employee', signupRateLimit, async (req, res) => {
+router.post('/api/auth/signup/employee', signupRateLimit, async (req, res) => {
   try {
     const result = await authModule.signupEmployee(req.body);
     res.status(201).json(result);
@@ -108,7 +108,7 @@ router.post('/login', authRateLimit, async (req, res) => {
 });
 
 // Email verification
-router.post('/verify-email', async (req, res) => {
+router.post('/api/auth/verify-email', async (req, res) => {
   try {
     const { token } = req.body;
     
@@ -179,7 +179,7 @@ router.post('/password-reset/confirm', async (req, res) => {
 // Protected routes (authentication required)
 
 // Admin signup (requires admin privileges)
-router.post('/signup/admin', authenticateToken, authorizeRoles('super_admin', 'admin'), signupRateLimit, async (req, res) => {
+router.post('/api/auth/signup/admin', authenticateToken, authorizeRoles('super_admin', 'admin'), signupRateLimit, async (req, res) => {
   try {
     const result = await authModule.signupAdmin(req.body, req.user.userId);
     res.status(201).json(result);
@@ -216,6 +216,25 @@ router.get('/profile', authenticateToken, async (req, res) => {
   }
 });
 
+// Signup demo page
+router.get('/signup', (req, res) => {
+  res.sendFile('public/api/auth/signup.html', { root: '.' });
+});
+
+// Email verification page
+router.get('/verify-email', (req, res) => {
+  res.sendFile('public/verify-email.html', { root: '.' });
+});
+
+// Password reset page
+router.get('/reset-password', (req, res) => {
+  res.sendFile('public/reset-password.html', { root: '.' });
+});
+
+// Login page
+router.get('/login', (req, res) => {
+  res.sendFile('public/login.html', { root: '.' });
+});
 // Update user profile
 router.put('/profile', authenticateToken, async (req, res) => {
   try {

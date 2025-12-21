@@ -162,8 +162,8 @@
                     <p><strong>Role:</strong> <span id="userRole"></span></p>
                     <p><strong>Status:</strong> <span id="userStatus"></span></p>
                 </div>
-                <a href="/login" class="btn">Login to Your Account</a>
-                <a href="/signup-demo" class="btn secondary">Back to Signup</a>
+                <a href="/api/auth/login" class="btn">Login to Your Account</a>
+                <a href="/api/auth/signup" class="btn secondary">Back to Signup</a>
             </div>
 
             <!-- Error State -->
@@ -173,7 +173,7 @@
                     <strong>Verification Failed</strong><br>
                     <span id="errorMessage">The verification link is invalid or has expired.</span>
                 </div>
-                <a href="/signup-demo" class="btn">Try Again</a>
+                <a href="/api/auth/signup" class="btn">Try Again</a>
                 <a href="/api/auth/password-reset/request" class="btn secondary">Reset Password</a>
             </div>
         </div>
@@ -191,7 +191,7 @@
             }
 
             try {
-                const response = await fetch('/api/auth/verify-email', {
+                const response = await fetch('/api/auth/api/auth/verify-email', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

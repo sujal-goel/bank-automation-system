@@ -652,13 +652,13 @@
         document.getElementById('customerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const data = getFormData(e.target);
-            await submitForm('/signup/customer', data, 'customerResponse');
+            await submitForm('/api/auth/signup/customer', data, 'customerResponse');
         });
 
         document.getElementById('employeeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const data = getFormData(e.target);
-            await submitForm('/signup/employee', data, 'employeeResponse');
+            await submitForm('/api/auth/signup/employee', data, 'employeeResponse');
         });
 
         document.getElementById('adminForm').addEventListener('submit', async (e) => {
@@ -671,7 +671,7 @@
                 return;
             }
             
-            await submitForm('/signup/admin', data, 'adminResponse', token);
+            await submitForm('/api/auth/signup/admin', data, 'adminResponse', token);
         });
 
         // Password validation

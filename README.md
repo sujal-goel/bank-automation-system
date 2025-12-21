@@ -95,7 +95,9 @@ The system follows a microservices architecture with:
    - API: http://localhost:3000
    - API Documentation: http://localhost:3000/api-docs
    - Health Check: http://localhost:3000/health
-   - Signup Demo: http://localhost:3000/signup-demo
+   - Signup Demo: http://localhost:3000/api/auth/signup
+   - Email Verification: http://localhost:3000/api/auth/verify-email?token=TOKEN
+   - Password Reset: http://localhost:3000/api/auth/reset-password?token=TOKEN
 
 ### Default Users
 
@@ -128,16 +130,19 @@ npm run test:email
 
 # Test signup procedures
 npm run test:signup
+
+# Test password reset flow
+npm run test:password-reset
 ```
 
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/signup/customer` - Customer registration
-- `POST /api/auth/signup/employee` - Employee registration
-- `POST /api/auth/signup/admin` - Admin registration (requires admin token)
+- `POST /api/auth/api/auth/signup/customer` - Customer registration
+- `POST /api/auth/api/auth/signup/employee` - Employee registration
+- `POST /api/auth/api/auth/signup/admin` - Admin registration (requires admin token)
 - `POST /api/auth/login` - User login
-- `POST /api/auth/verify-email` - Email verification
+- `POST /api/auth/api/auth/verify-email` - Email verification
 - `POST /api/auth/password-reset/request` - Request password reset
 - `POST /api/auth/password-reset/confirm` - Confirm password reset
 - `GET /api/auth/users` - Get all users (admin only)
@@ -184,4 +189,206 @@ banking-process-automation/
 │   │   ├── kyc/
 │   │   ├── loan-processing/
 │   │   ├── payment-processing/
-│ 
+│   │   └── transaction-processing/
+│   ├── services/               # Shared services
+│   │   ├── audit-service.js
+│   │   ├── circuit-breaker.js
+│   │   ├── credit-bureau-*.js
+│   │   ├── document-*.js
+│   │   ├── email-service.js
+│   │   ├── health-monitor.js
+│   │   ├── identity-validator.js
+│   │   ├── notification-service.js
+│   │   ├── ocr-engine.js
+│   │   ├── payment-*.js
+│   │   └── regulatory-reporting.js
+│   ├── shared/                 # Shared utilities
+│   │   ├── interfaces.js
+│   │   ├── types.js
+│   │   └── validation.js
+│   ├── __tests__/              # Test files
+│   └── index.js                # Application entry point
+├── database/
+│   └── migrations/             # Database migrations
+│       └── 001_create_users_table.sql
+├── k8s/                        # Kubernetes manifests
+├── public/                     # Static files
+│   ├── signup.html
+│   └── verify-email.html
+├── scripts/                    # Utility scripts
+│   ├── deploy.sh
+│   ├── setup-dev.ps1
+│   └── setup-dev.sh
+├── docker-compose.yml          # Docker Compose configuration
+├── Dockerfile                  # Application container
+├── package.json
+└── README.md
+```
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file with the following variables:
+
+```bash
+# Server Configuration
+NODE_ENV=development
+PORT=3000
+HOST=localhost
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=banking_automation
+DB_USERNAME=banking_user
+DB_PASSWORD=your_password
+DB_SSL=false
+
+# Redis Configuration (optional)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Security
+JWT_SECRET=your-secret-key-change-in-production
+BCRYPT_ROUNDS=12
+
+# Email Configuration (optional for development)
+EMAIL_PROVIDER=smtp
+EMAIL_FROM=noreply@yourbank.com
+SMTP_HOST=smtp.yourprovider.com
+SMTP_PORT=587
+SMTP_USER=your-smtp-username
+SMTP_PASSWORD=your-smtp-password
+```
+
+### Email Service
+
+The system supports multiple email configurations:
+
+**Development Mode** (default)
+- Emails are logged to console
+- No external service required
+
+**Production SMTP**
+- Configure SMTP settings in `.env`
+- Supports any SMTP provider
+
+**Gmail**
+- Set `EMAIL_PROVIDER=gmail`
+- Use app-specific password
+
+See [SIGNUP_PROCEDURES.md](SIGNUP_PROCEDURES.md) for detailed email configuration.
+
+## Deployment
+
+### Docker Deployment
+
+```bash
+# Build and start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Kubernetes Deployment
+
+```bash
+# Deploy to Kubernetes
+kubectl apply -f k8s/
+
+# Check deployment status
+kubectl get pods -n banking-automation
+
+# View logs
+kubectl logs -f deployment/banking-app-deployment -n banking-automation
+```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive deployment instructions.
+
+## Security
+
+- **Password Requirements**: Minimum 8 characters with uppercase, lowercase, number, and special character
+- **JWT Authentication**: 24-hour token expiration
+- **Rate Limiting**: Protection against brute force attacks
+- **Role-Based Access Control**: Granular permissions
+- **Email Verification**: Required for all accounts
+- **Admin Approval**: Required for employee and admin accounts
+- **Audit Logging**: Complete audit trail for compliance
+
+## Documentation
+
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Comprehensive deployment guide
+- [SIGNUP_PROCEDURES.md](SIGNUP_PROCEDURES.md) - Authentication and signup procedures
+- API Documentation: http://localhost:3000/api-docs
+
+## Development
+
+### Running in Development Mode
+
+```bash
+# Start with auto-reload
+npm run dev
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+### Database Migrations
+
+Migrations run automatically on application startup. To run manually:
+
+```bash
+# Migrations are in database/migrations/
+# They execute in order based on filename
+```
+
+### Adding New Modules
+
+1. Create module directory in `src/modules/`
+2. Implement module class with required methods
+3. Register routes in `src/gateway/api-gateway.js`
+4. Add tests in `src/__tests__/`
+
+## Monitoring
+
+### Health Checks
+
+```bash
+# Simple health check
+curl http://localhost:3000/health
+
+# Detailed health report
+curl http://localhost:3000/health/detailed
+
+# Service discovery
+curl http://localhost:3000/services
+
+# Circuit breaker status
+curl http://localhost:3000/circuit-breakers
+```
+
+### Logs
+
+Application logs include:
+- Request/response logging
+- Authentication events
+- Database queries (in development)
+- Email notifications
+- Error tracking
+- Audit events
+
+## License
+
+MIT
+
+## Support
+
+For issues, questions, or contributions:
+- Create an issue in the repository
+- Review the API documentation
+- Check the deployment guide

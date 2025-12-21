@@ -85,20 +85,7 @@ app.get('/circuit-breakers', (req, res) => {
 // Serve static files
 app.use('/public', express.static('public'));
 
-// Signup demo page
-app.get('/signup-demo', (req, res) => {
-  res.sendFile('public/signup-demo.html', { root: '.' });
-});
 
-// Email verification page
-app.get('/verify-email', (req, res) => {
-  res.sendFile('public/verify-email.html', { root: '.' });
-});
-
-// Login page redirect
-app.get('/login', (req, res) => {
-  res.redirect('/signup-demo');
-});
 
 // API documentation endpoint (public)
 app.get('/api-docs', (req, res) => {

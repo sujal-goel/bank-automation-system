@@ -11,7 +11,7 @@ async function testVerification() {
   console.log('Token:', customerToken);
   
   try {
-    const response = await fetch(`${BASE_URL}/verify-email`, {
+    const response = await fetch(`${BASE_URL}/api/auth/verify-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: customerToken })
@@ -36,7 +36,7 @@ async function testVerification() {
   console.log('Token:', employeeToken);
   
   try {
-    const response = await fetch(`${BASE_URL}/verify-email`, {
+    const response = await fetch(`${BASE_URL}/api/auth/verify-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: employeeToken })
