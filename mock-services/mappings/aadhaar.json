@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/aadhaar/verify"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "verified": true,
+      "status": "success",
+      "timestamp": "{{now}}"
+    }
+  }
+}

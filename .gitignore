@@ -4,8 +4,6 @@ database
 k8s
 .vscode
 .kiro
-mock-services
-scripts
 temp
 uploads
 redis

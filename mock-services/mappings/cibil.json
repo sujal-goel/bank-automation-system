@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/cibil/credit-score"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "creditScore": 750,
+      "status": "success",
+      "reportDate": "{{now format='yyyy-MM-dd'}}"
+    }
+  }
+}
