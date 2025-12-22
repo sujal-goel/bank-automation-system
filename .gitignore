@@ -1,6 +1,6 @@
 node_modules
 logs
-database
+# database
 k8s
 .vscode
 .kiro

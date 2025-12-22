@@ -7,14 +7,13 @@ const path = require('path');
 
 class OCREngine {
   constructor(options = {}) {
-    this.supportedFormats = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.pdf'];
+    this.supportedFormats = ['.jpg', '.jpeg', '.png', '.pdf'];
     this.initialized = false;
     this.mockMode = options.mockMode || process.env.NODE_ENV === 'test';
   }
 
   async initialize() {
     if (this.initialized) return;
-    
     try {
       // Initialize Tesseract worker with updated API
       this.worker = await Tesseract.createWorker('eng');

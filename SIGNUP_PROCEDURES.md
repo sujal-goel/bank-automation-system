@@ -42,15 +42,15 @@ Each user type has different validation requirements, approval processes, and ac
 
 ### Base URL
 ```
-POST /api/auth/api/auth/signup/{userType}
+POST /api/auth/signup/{userType}
 ```
 
 ### Available Endpoints
-- `POST /api/auth/api/auth/signup/customer` - Customer registration
-- `POST /api/auth/api/auth/signup/employee` - Employee registration  
-- `POST /api/auth/api/auth/signup/admin` - Admin registration (requires admin privileges)
+- `POST /api/auth/signup/customer` - Customer registration
+- `POST /api/auth/signup/employee` - Employee registration  
+- `POST /api/auth/signup/admin` - Admin registration (requires admin privileges)
 - `POST /api/auth/login` - User login
-- `POST /api/auth/api/auth/verify-email` - Email verification
+- `POST /api/auth/verify-email` - Email verification
 - `POST /api/auth/password-reset/request` - Request password reset
 - `POST /api/auth/password-reset/confirm` - Confirm password reset
 - `GET /api/auth/users` - Get all users (admin only)
@@ -61,7 +61,7 @@ POST /api/auth/api/auth/signup/{userType}
 
 ### Endpoint
 ```
-POST /api/auth/api/auth/signup/customer
+POST /api/auth/signup/customer
 ```
 
 ### Request Body
@@ -130,7 +130,7 @@ POST /api/auth/api/auth/signup/customer
 
 ### Endpoint
 ```
-POST /api/auth/api/auth/signup/employee
+POST /api/auth/signup/employee
 ```
 
 ### Request Body
@@ -214,7 +214,7 @@ Based on department and position:
 
 ### Endpoint
 ```
-POST /api/auth/api/auth/signup/admin
+POST /api/auth/signup/admin
 ```
 
 ### Authentication Required
@@ -506,7 +506,7 @@ POST /api/auth/login
 
 ### Email Verification
 ```
-POST /api/auth/api/auth/verify-email
+POST /api/auth/verify-email
 ```
 
 ```json
@@ -635,7 +635,7 @@ GET /api/auth/pending-approvals
 
 ### 1. Test Customer Signup
 ```bash
-curl -X POST http://localhost:3000/api/auth/api/auth/signup/customer \
+curl -X POST http://localhost:3000/api/auth/signup/customer \
   -H "Content-Type: application/json" \
   -d '{
     "email": "testcustomer@example.com",
@@ -661,7 +661,7 @@ curl -X POST http://localhost:3000/api/auth/api/auth/signup/customer \
 
 ### 2. Test Employee Signup
 ```bash
-curl -X POST http://localhost:3000/api/auth/api/auth/signup/employee \
+curl -X POST http://localhost:3000/api/auth/signup/employee \
   -H "Content-Type: application/json" \
   -d '{
     "email": "testemployee@bank.com",
@@ -689,7 +689,7 @@ curl -X POST http://localhost:3000/api/auth/login \
   }'
 
 # Then create new admin (use token from login response)
-curl -X POST http://localhost:3000/api/auth/api/auth/signup/admin \
+curl -X POST http://localhost:3000/api/auth/signup/admin \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
