@@ -58,6 +58,11 @@ const useNotificationStore = create(
        * @param {string} token - Authentication token
        */
       connect: (userId, token) => {
+        // Only connect in browser environment
+        if (typeof window === 'undefined') {
+          return;
+        }
+
         const state = get();
         
         if (state.socket || state.connecting) {
@@ -170,7 +175,7 @@ const useNotificationStore = create(
         }
 
         // Show browser notification if permission granted
-        if (Notification.permission === 'granted' && !notification.read) {
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted' && !notification.read) {
           new Notification(enhancedNotification.title, {
             body: enhancedNotification.message,
             icon: '/favicon.ico',
@@ -246,11 +251,11 @@ const useNotificationStore = create(
        * Request browser notification permission
        */
       requestPermission: async () => {
-        if ('Notification' in window && Notification.permission === 'default') {
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
           const permission = await Notification.requestPermission();
           return permission === 'granted';
         }
-        return Notification.permission === 'granted';
+        return typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted';
       },
     }),
     {

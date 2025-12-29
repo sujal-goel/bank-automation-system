@@ -14,15 +14,21 @@ export default function useOffline() {
   const [queuedForms, setQueuedForms] = useState([]);
   const [syncInProgress, setSyncInProgress] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Initialize mounted state
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Initialize online status and network info
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (mounted && typeof window !== 'undefined') {
       setIsOnline(navigator.onLine);
       setNetworkStatus(getNetworkStatus());
       loadQueuedForms();
     }
-  }, []);
+  }, [mounted]);
 
   // Listen for online/offline events
   useEffect(() => {
@@ -81,8 +87,10 @@ export default function useOffline() {
 
   // Load queued forms from storage
   const loadQueuedForms = useCallback(() => {
-    const forms = offlineStorage.getStoredForms();
-    setQueuedForms(forms);
+    if (typeof window !== 'undefined') {
+      const forms = offlineStorage.getStoredForms();
+      setQueuedForms(forms);
+    }
   }, []);
 
   // Queue form data for offline submission
@@ -105,7 +113,7 @@ export default function useOffline() {
 
   // Sync queued data when connection is restored
   const syncQueuedData = useCallback(async () => {
-    if (!isOnline || syncInProgress) {
+    if (!mounted || !isOnline || syncInProgress || typeof window === 'undefined') {
       return;
     }
 
@@ -152,7 +160,7 @@ export default function useOffline() {
     } finally {
       setSyncInProgress(false);
     }
-  }, [isOnline, syncInProgress, loadQueuedForms]);
+  }, [isOnline, syncInProgress, loadQueuedForms, mounted]);
 
   // Manual retry sync
   const retrySyncData = useCallback(async () => {
@@ -163,11 +171,13 @@ export default function useOffline() {
 
   // Clear all queued data
   const clearQueuedData = useCallback(() => {
-    const forms = offlineStorage.getStoredForms();
-    forms.forEach(form => {
-      localStorage.removeItem(form.key);
-    });
-    loadQueuedForms();
+    if (typeof window !== 'undefined') {
+      const forms = offlineStorage.getStoredForms();
+      forms.forEach(form => {
+        localStorage.removeItem(form.key);
+      });
+      loadQueuedForms();
+    }
   }, [loadQueuedForms]);
 
   // Get connection quality
