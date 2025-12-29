@@ -24,6 +24,11 @@ class ApiClient {
    * @returns {string|null} JWT token
    */
   getToken() {
+    // Only access auth store on client side
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    
     const authStore = useAuthStore.getState();
     return authStore.token;
   }
@@ -57,8 +62,9 @@ class ApiClient {
       
       // Handle authentication errors
       if (response.status === 401) {
-        useAuthStore.getState().logout();
+        // Only handle logout on client side
         if (typeof window !== 'undefined') {
+          useAuthStore.getState().logout();
           window.location.href = '/login';
         }
         throw new Error('Authentication required');
@@ -85,6 +91,11 @@ class ApiClient {
    * @returns {Promise<Object>} Upload response
    */
   async upload(file, endpoint, onProgress) {
+    // Only available on client side
+    if (typeof window === 'undefined') {
+      throw new Error('File upload not available during SSR');
+    }
+    
     const token = this.getToken();
     const url = `${this.baseURL}${endpoint}`;
     

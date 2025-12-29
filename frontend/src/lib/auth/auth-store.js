@@ -5,6 +5,10 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { useEffect, useState } from 'react';
+
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
 
 const useAuthStore = create(
   persist(
@@ -180,14 +184,33 @@ const useAuthStore = create(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: isBrowser ? createJSONStorage(() => localStorage) : createJSONStorage(() => ({
+        getItem: () => null,
+        setItem: () => {},
+        removeItem: () => {},
+      })),
       partialize: (state) => ({
         user: state.user,
         token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
+      skipHydration: !isBrowser,
     },
   ),
 );
+
+// Hook to handle hydration
+export const useAuthStoreHydration = () => {
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  useEffect(() => {
+    if (isBrowser) {
+      useAuthStore.persist.rehydrate();
+      setHasHydrated(true);
+    }
+  }, []);
+
+  return hasHydrated;
+};
 
 export default useAuthStore;

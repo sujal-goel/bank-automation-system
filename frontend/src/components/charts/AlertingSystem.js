@@ -22,6 +22,9 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
 /**
  * @typedef {Object} Alert
  * @property {string} id - Alert ID
@@ -301,6 +304,7 @@ const AlertsTab = ({ alerts, loading, filters, onFiltersChange, onAcknowledge, o
  * @param {string} [props.className] - Additional CSS classes
  */
 const AlertingSystem = ({ className = '' }) => {
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('alerts');
   const [showThresholdModal, setShowThresholdModal] = useState(false);
   const [editingThreshold, setEditingThreshold] = useState(null);
@@ -313,7 +317,14 @@ const AlertingSystem = ({ className = '' }) => {
 
   const queryClient = useQueryClient();
 
-  // Fetch active alerts
+  // Ensure component only renders on client side
+  useEffect(() => {
+    if (isBrowser) {
+      setMounted(true);
+    }
+  }, []);
+
+  // Fetch active alerts - only on client side
   const { data: alerts, isLoading: alertsLoading } = useQuery({
     queryKey: ['alerts', alertFilters],
     queryFn: async () => {
@@ -323,15 +334,17 @@ const AlertingSystem = ({ className = '' }) => {
       return response.data || [];
     },
     refetchInterval: 30000, // Refresh every 30 seconds
+    enabled: mounted && isBrowser,
   });
 
-  // Fetch alert thresholds
+  // Fetch alert thresholds - only on client side
   const { data: thresholds, isLoading: thresholdsLoading } = useQuery({
     queryKey: ['alert-thresholds'],
     queryFn: async () => {
       const response = await apiClient.request('/api/analytics/alert-thresholds');
       return response.data || [];
     },
+    enabled: mounted && isBrowser,
   });
 
   // Acknowledge alert mutation
@@ -380,6 +393,24 @@ const AlertingSystem = ({ className = '' }) => {
   const handleCloseDeliveries = () => {
     setSelectedAlertForDeliveries(null);
   };
+
+  // Show loading state during SSR or before mounting
+  if (!mounted || !isBrowser) {
+    return (
+      <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
+        <div className="p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+            <div className="space-y-3">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

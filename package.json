@@ -6,11 +6,18 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "build": "echo 'No build step required for Node.js'",
-    "vercel-build": "echo 'Vercel build completed'",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "npm run dev",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build": "cd frontend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "echo 'No build step required for Node.js backend'",
+    "vercel-build": "npm run build:frontend",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:frontend": "cd frontend && npm test",
+    "test:e2e": "cd frontend && npm run test:e2e",
     "setup:dev": "powershell -ExecutionPolicy Bypass -File scripts/setup-dev.ps1",
     "setup:dev:bash": "bash scripts/setup-dev.sh",
     "setup:quick": "powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1",
@@ -32,9 +39,12 @@
     "start:dev": "powershell -Command \"Write-Host 'Starting Banking System Development Server...' -ForegroundColor Green; npm run dev\"",
     "start:prod": "powershell -Command \"Write-Host 'Starting Banking System Production Server...' -ForegroundColor Green; npm start\"",
     "logs": "powershell -Command \"Get-Content logs\\*.log -Tail 50 -Wait 2>$null || Write-Host 'No log files found' -ForegroundColor Yellow\"",
-    "clean": "powershell -Command \"Remove-Item -Recurse -Force node_modules, logs\\* -ErrorAction SilentlyContinue; Write-Host 'Cleaned node_modules and logs' -ForegroundColor Green\"",
+    "clean": "powershell -Command \"Remove-Item -Recurse -Force node_modules, logs\\*, frontend\\node_modules, frontend\\.next -ErrorAction SilentlyContinue; Write-Host 'Cleaned node_modules and build files' -ForegroundColor Green\"",
     "migrate": "node -e \"require('./src/database/connection').runMigrations().then(() => console.log('Migrations completed')).catch(console.error)\"",
-    "db:health": "node -e \"require('./src/database/connection').healthCheck().then(result => console.log(JSON.stringify(result, null, 2))).catch(console.error)\""
+    "db:health": "node -e \"require('./src/database/connection').healthCheck().then(result => console.log(JSON.stringify(result, null, 2))).catch(console.error)\"",
+    "install:all": "npm install && cd frontend && npm install",
+    "lint": "cd frontend && npm run lint",
+    "format": "cd frontend && npm run format"
   },
   "keywords": [
     "banking",
@@ -44,6 +54,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
     "supertest": "^7.1.4"

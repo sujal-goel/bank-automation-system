@@ -15,19 +15,20 @@ import DemoAccounts from '@/components/auth/DemoAccounts';
 // Login content component that uses useSearchParams
 function LoginContent() {
   const [activeTab, setActiveTab] = useState('customer');
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, hasHydrated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect');
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (hasHydrated && !isLoading && isAuthenticated) {
       router.push(redirectTo || '/');
     }
-  }, [isAuthenticated, isLoading, router, redirectTo]);
+  }, [isAuthenticated, isLoading, hasHydrated, router, redirectTo]);
 
-  if (isLoading) {
+  // Show loading while hydrating or loading
+  if (!hasHydrated || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>

@@ -92,7 +92,7 @@ export default function DocumentUpload({
 
   // Create file preview for images
   const createPreview = (file) => {
-    if (file.type.startsWith('image/')) {
+    if (typeof window !== 'undefined' && file.type.startsWith('image/')) {
       return URL.createObjectURL(file);
     }
     return null;
@@ -197,8 +197,8 @@ export default function DocumentUpload({
   const removeFile = (fileId) => {
     const updatedFiles = files.filter(file => {
       if (file.id === fileId) {
-        // Clean up preview URL
-        if (file.preview) {
+        // Clean up preview URL (only in browser)
+        if (typeof window !== 'undefined' && file.preview) {
           URL.revokeObjectURL(file.preview);
         }
         return false;

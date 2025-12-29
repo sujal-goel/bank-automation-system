@@ -30,9 +30,11 @@ export default function DemoAccounts({ userType }) {
   const account = demoAccounts[userType];
 
   const copyToClipboard = (text, field) => {
-    navigator.clipboard.writeText(text);
-    setCopied(field);
-    setTimeout(() => setCopied(null), 2000);
+    if (typeof window !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopied(field);
+      setTimeout(() => setCopied(null), 2000);
+    }
   };
 
   return (

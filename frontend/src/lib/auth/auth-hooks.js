@@ -5,12 +5,13 @@
 
 import { useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import useAuthStore from './auth-store';
+import useAuthStore, { useAuthStoreHydration } from './auth-store';
 
 /**
  * Main authentication hook
  */
 export const useAuth = () => {
+  const hasHydrated = useAuthStoreHydration();
   const {
     user,
     token,
@@ -29,8 +30,8 @@ export const useAuth = () => {
   return {
     user,
     token,
-    isAuthenticated,
-    isLoading,
+    isAuthenticated: hasHydrated ? isAuthenticated : false,
+    isLoading: hasHydrated ? isLoading : true,
     error,
     login,
     logout,
@@ -39,6 +40,7 @@ export const useAuth = () => {
     clearError,
     hasRole,
     hasPermission,
+    hasHydrated,
   };
 };
 

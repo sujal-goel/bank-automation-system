@@ -5,9 +5,12 @@
 
 'use client';
 
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
 // Service worker registration
 export const registerServiceWorker = async () => {
-  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+  if (!isBrowser || !('serviceWorker' in navigator)) {
     console.log('Service Worker not supported');
     return null;
   }
@@ -45,6 +48,8 @@ export const registerServiceWorker = async () => {
 
 // Handle service worker messages
 const handleServiceWorkerMessage = (event) => {
+  if (!isBrowser) return;
+  
   const { data } = event;
 
   switch (data.type) {
@@ -70,6 +75,8 @@ const handleServiceWorkerMessage = (event) => {
 
 // Show update available notification
 const showUpdateAvailableNotification = (registration) => {
+  if (!isBrowser) return;
+  
   // Create a custom event for the app to handle
   const event = new CustomEvent('sw-update-available', {
     detail: { registration },
@@ -79,6 +86,8 @@ const showUpdateAvailableNotification = (registration) => {
 
 // Show sync success notification
 const showSyncSuccessNotification = (data) => {
+  if (!isBrowser) return;
+  
   const event = new CustomEvent('sw-sync-success', {
     detail: data,
   });
@@ -87,12 +96,16 @@ const showSyncSuccessNotification = (data) => {
 
 // Show offline ready notification
 const showOfflineReadyNotification = () => {
+  if (!isBrowser) return;
+  
   const event = new CustomEvent('sw-offline-ready');
   window.dispatchEvent(event);
 };
 
 // Update service worker
 export const updateServiceWorker = (registration) => {
+  if (!isBrowser) return;
+  
   if (registration && registration.waiting) {
     registration.waiting.postMessage({ type: 'SKIP_WAITING' });
     window.location.reload();
@@ -101,7 +114,7 @@ export const updateServiceWorker = (registration) => {
 
 // Get cache status
 export const getCacheStatus = async () => {
-  if (!navigator.serviceWorker.controller) {
+  if (!isBrowser || !navigator.serviceWorker.controller) {
     return null;
   }
 
@@ -121,26 +134,28 @@ export const getCacheStatus = async () => {
 
 // Clear all caches
 export const clearAllCaches = async () => {
-  if ('caches' in window) {
-    const cacheNames = await caches.keys();
-    await Promise.all(
-      cacheNames.map(cacheName => caches.delete(cacheName)),
-    );
-    console.log('All caches cleared');
-  }
+  if (!isBrowser || !('caches' in window)) return;
+  
+  const cacheNames = await caches.keys();
+  await Promise.all(
+    cacheNames.map(cacheName => caches.delete(cacheName)),
+  );
+  console.log('All caches cleared');
 };
 
 // Preload critical resources
 export const preloadCriticalResources = async (urls) => {
-  if ('caches' in window) {
-    const cache = await caches.open('banking-critical-v1');
-    await cache.addAll(urls);
-    console.log('Critical resources preloaded');
-  }
+  if (!isBrowser || !('caches' in window)) return;
+  
+  const cache = await caches.open('banking-critical-v1');
+  await cache.addAll(urls);
+  console.log('Critical resources preloaded');
 };
 
 // Check if app is running in standalone mode (PWA)
 export const isStandalone = () => {
+  if (!isBrowser) return false;
+  
   return window.matchMedia('(display-mode: standalone)').matches ||
          window.navigator.standalone === true;
 };
@@ -148,36 +163,49 @@ export const isStandalone = () => {
 // Install prompt handling
 let deferredPrompt = null;
 
-window.addEventListener('beforeinstallprompt', (event) => {
-  event.preventDefault();
-  deferredPrompt = event;
-  
-  // Dispatch custom event for app to handle
-  const customEvent = new CustomEvent('pwa-install-available');
-  window.dispatchEvent(customEvent);
-});
+// Initialize install prompt handling only in browser
+if (isBrowser) {
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+    
+    // Dispatch custom event for app to handle
+    const customEvent = new CustomEvent('pwa-install-available');
+    window.dispatchEvent(customEvent);
+  });
+}
 
 export const showInstallPrompt = async () => {
-  if (!deferredPrompt) {
+  if (!isBrowser || !deferredPrompt) {
     return false;
   }
 
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  
-  deferredPrompt = null;
-  
-  return outcome === 'accepted';
+  try {
+    const result = await deferredPrompt.prompt();
+    deferredPrompt = null;
+    return result.outcome === 'accepted';
+  } catch (error) {
+    console.error('Error showing install prompt:', error);
+    return false;
+  }
 };
 
-// Network status utilities
+// Get network status
 export const getNetworkStatus = () => {
+  if (!isBrowser || !navigator.connection) {
+    return {
+      online: navigator?.onLine || true,
+      effectiveType: 'unknown',
+      rtt: 0,
+      downlink: 0,
+    };
+  }
+
   return {
     online: navigator.onLine,
-    connection: navigator.connection || navigator.mozConnection || navigator.webkitConnection,
-    effectiveType: navigator.connection?.effectiveType || 'unknown',
-    downlink: navigator.connection?.downlink || 0,
-    rtt: navigator.connection?.rtt || 0,
+    effectiveType: navigator.connection.effectiveType,
+    rtt: navigator.connection.rtt || 0,
+    downlink: navigator.connection.downlink || 0,
   };
 };
 
