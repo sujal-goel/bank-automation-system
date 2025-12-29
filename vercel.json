@@ -1,15 +1,7 @@
 {
   "version": 2,
   "name": "banking-process-automation",
-  "builds": [
-    {
-      "src": "src/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
-    }
-  ],
+
   "routes": [
     {
       "src": "/api/(.*)",
