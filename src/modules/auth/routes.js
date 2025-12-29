@@ -40,7 +40,7 @@ const authModule = new AuthModule();
 // Rate limiting for auth endpoints
 const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per window
+  max: 500, // 5 attempts per window
   message: { error: 'Too many authentication attempts, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -57,7 +57,7 @@ const signupRateLimit = rateLimit({
 // Public routes (no authentication required)
 
 // Customer signup
-router.post('/api/auth/signup/customer', signupRateLimit, async (req, res) => {
+router.post('/signup/customer', signupRateLimit, async (req, res) => {
   try {
     const result = await authModule.signupCustomer(req.body);
     res.status(201).json(result);
@@ -71,7 +71,7 @@ router.post('/api/auth/signup/customer', signupRateLimit, async (req, res) => {
 });
 
 // Employee signup
-router.post('/api/auth/signup/employee', signupRateLimit, async (req, res) => {
+router.post('/signup/employee', signupRateLimit, async (req, res) => {
   try {
     const result = await authModule.signupEmployee(req.body);
     res.status(201).json(result);
@@ -108,7 +108,7 @@ router.post('/login', authRateLimit, async (req, res) => {
 });
 
 // Email verification
-router.post('/api/auth/verify-email', async (req, res) => {
+router.post('/verify-email', async (req, res) => {
   try {
     const { token } = req.body;
     
@@ -179,7 +179,7 @@ router.post('/password-reset/confirm', async (req, res) => {
 // Protected routes (authentication required)
 
 // Admin signup (requires admin privileges)
-router.post('/api/auth/signup/admin', authenticateToken, authorizeRoles('super_admin', 'admin'), signupRateLimit, async (req, res) => {
+router.post('/signup/admin', authenticateToken, authorizeRoles('super_admin', 'admin'), signupRateLimit, async (req, res) => {
   try {
     const result = await authModule.signupAdmin(req.body, req.user.userId);
     res.status(201).json(result);
@@ -218,7 +218,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
 
 // Signup demo page
 router.get('/signup', (req, res) => {
-  res.sendFile('public/api/auth/signup.html', { root: '.' });
+  res.sendFile('public/signup.html', { root: '.' });
 });
 
 // Email verification page

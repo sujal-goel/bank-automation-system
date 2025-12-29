@@ -4,7 +4,6 @@ const { v4: uuidv4 } = require('uuid');
 const Joi = require('joi');
 const db = require('../../database/connection');
 const emailService = require('../../services/email-service');
-const { fail } = require('assert');
 
 class AuthModule {
   constructor() {
@@ -490,7 +489,7 @@ class AuthModule {
     if (user.status !== 'active') {
       throw new Error(`Account is ${user.status}. Please contact administrator.`);
     }
-    console.log(user);
+
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
       throw new Error('Invalid credentials');
@@ -775,11 +774,10 @@ class AuthModule {
       
       // Send password reset email
       try {
-        const res = await emailService.sendPasswordReset(fullUser, token);
+        await emailService.sendPasswordReset(fullUser, token);
         return {
           success: true,
-          message: 'Password reset link has been sent to your email.',
-          // resetToken: token // In production, this would not be returned
+          message: 'Password reset link has been sent to your email.'
         };
       } catch (emailError) {
         console.error('Failed to send password reset email:', emailError);

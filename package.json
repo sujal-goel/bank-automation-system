@@ -6,12 +6,16 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
+    "build": "echo 'No build step required for Node.js'",
+    "vercel-build": "echo 'Vercel build completed'",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "setup:dev": "powershell -ExecutionPolicy Bypass -File scripts/setup-dev.ps1",
     "setup:dev:bash": "bash scripts/setup-dev.sh",
     "setup:quick": "powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1",
+    "deploy:vercel": "vercel --prod",
+    "deploy:vercel:preview": "vercel",
     "deploy:dev": "powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1 development",
     "deploy:staging": "powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1 staging",
     "deploy:prod": "powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1 production",
@@ -23,11 +27,14 @@
     "k8s:delete": "kubectl delete -f k8s/",
     "config:validate": "node -e \"require('./src/config').validate(); console.log('Configuration is valid')\"",
     "health:check": "powershell -Command \"try { Invoke-RestMethod -Uri http://localhost:3000/health -Method Get } catch { exit 1 }\"",
+    "health:check:vercel": "curl -f https://your-app.vercel.app/health || exit 1",
     "test:system": "powershell -ExecutionPolicy Bypass -File test-system.ps1",
     "start:dev": "powershell -Command \"Write-Host 'Starting Banking System Development Server...' -ForegroundColor Green; npm run dev\"",
     "start:prod": "powershell -Command \"Write-Host 'Starting Banking System Production Server...' -ForegroundColor Green; npm start\"",
     "logs": "powershell -Command \"Get-Content logs\\*.log -Tail 50 -Wait 2>$null || Write-Host 'No log files found' -ForegroundColor Yellow\"",
-    "clean": "powershell -Command \"Remove-Item -Recurse -Force node_modules, logs\\* -ErrorAction SilentlyContinue; Write-Host 'Cleaned node_modules and logs' -ForegroundColor Green\""
+    "clean": "powershell -Command \"Remove-Item -Recurse -Force node_modules, logs\\* -ErrorAction SilentlyContinue; Write-Host 'Cleaned node_modules and logs' -ForegroundColor Green\"",
+    "migrate": "node -e \"require('./src/database/connection').runMigrations().then(() => console.log('Migrations completed')).catch(console.error)\"",
+    "db:health": "node -e \"require('./src/database/connection').healthCheck().then(result => console.log(JSON.stringify(result, null, 2))).catch(console.error)\""
   },
   "keywords": [
     "banking",

@@ -56,14 +56,26 @@ class ConfigurationManager {
       },
       
       database: {
-        host: process.env.DB_HOST || 'localhost',
-        port: parseInt(process.env.DB_PORT) || 5432,
-        name: process.env.DB_NAME || 'banking_automation',
-        username: process.env.DB_USERNAME || 'banking_user',
-        password: process.env.DB_PASSWORD || '',
-        ssl: process.env.DB_SSL === 'true',
-        poolSize: parseInt(process.env.DB_POOL_SIZE) || 10,
-        connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 5000
+        // Supabase connection string (preferred for Vercel deployment)
+        connectionString: process.env.DATABASE_URL || process.env.SUPABASE_DB_URL,
+        
+        // Individual connection parameters (fallback)
+        host: process.env.DB_HOST || process.env.SUPABASE_HOST ||'localhost',
+        port: parseInt(process.env.DB_PORT || process.env.SUPABASE_PORT) || 5432,
+        name: process.env.DB_NAME || process.env.SUPABASE_DB_NAME || 'banking_automation',
+        username: process.env.DB_USERNAME || process.env.SUPABASE_USER || 'banking_user',
+        password: process.env.DB_PASSWORD || process.env.SUPABASE_PASSWORD || '',
+        
+        // SSL configuration (required for Supabase)
+        ssl: process.env.DB_SSL !== 'false' && process.env.NODE_ENV === 'production',
+        
+        // Connection pool settings optimized for serverless
+        poolSize: parseInt(process.env.DB_POOL_SIZE) || (process.env.VERCEL ? 1 : 5),
+        connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 5000,
+        
+        // Supabase-specific settings
+        schema: process.env.DB_SCHEMA || 'public',
+        searchPath: process.env.DB_SEARCH_PATH || 'public'
       },
       
       redis: {

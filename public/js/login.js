@@ -148,25 +148,25 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 function redirectToDashboard(role) {
     // Redirect based on user role
     const dashboardUrls = {
-        'customer': '/dashboard/customer',
-        'employee': '/dashboard/employee',
-        'bank_officer': '/dashboard/employee',
-        'senior_bank_officer': '/dashboard/employee',
-        'branch_manager': '/dashboard/manager',
-        'compliance_officer': '/dashboard/compliance',
-        'senior_compliance_officer': '/dashboard/compliance',
-        'compliance_manager': '/dashboard/compliance',
-        'risk_analyst': '/dashboard/risk',
-        'risk_manager': '/dashboard/risk',
-        'system_admin': '/dashboard/admin',
-        'developer': '/dashboard/admin',
-        'it_manager': '/dashboard/admin',
-        'department_admin': '/dashboard/admin',
-        'admin': '/dashboard/admin',
-        'super_admin': '/dashboard/admin'
+        'customer': '/customer/dashboard',
+        'employee': '/employee/workspace',
+        'bank_officer': '/employee/workspace',
+        'senior_bank_officer': '/employee/workspace',
+        'branch_manager': '/employee/workspace',
+        'compliance_officer': '/employee/workspace',
+        'senior_compliance_officer': '/employee/workspace',
+        'compliance_manager': '/employee/workspace',
+        'risk_analyst': '/employee/workspace',
+        'risk_manager': '/employee/workspace',
+        'system_admin': '/admin/dashboard',
+        'developer': '/admin/dashboard',
+        'it_manager': '/admin/dashboard',
+        'department_admin': '/admin/dashboard',
+        'admin': '/admin/dashboard',
+        'super_admin': '/admin/dashboard'
     };
 
-    const dashboardUrl = dashboardUrls[role] || '/dashboard';
+    const dashboardUrl = dashboardUrls[role] || '/customer/dashboard';
     
     // For now, redirect to signup demo since dashboards aren't implemented yet
     window.location.href = '/api/auth/profile';

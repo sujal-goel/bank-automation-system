@@ -1,23 +1,33 @@
 /**
  * Production Environment Configuration
+ * Optimized for production deployment with Supabase and enhanced security
  */
 module.exports = {
   server: {
-    port: parseInt(process.env.PORT) || 8080,
-    host: '0.0.0.0',
+    port: parseInt(process.env.PORT) || 3000,
+    host: process.env.HOST || '0.0.0.0',
     trustProxy: true,
-    requestTimeout: 30000
+    requestTimeout: parseInt(process.env.REQUEST_TIMEOUT) || 30000,
+    bodyLimit: process.env.BODY_LIMIT || '10mb'
   },
   
   database: {
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT) || 5432,
-    name: process.env.DB_NAME,
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    ssl: true,
-    poolSize: parseInt(process.env.DB_POOL_SIZE) || 20,
-    connectionTimeout: 10000,
+    // Support both connection string and individual parameters
+    connectionString: process.env.DATABASE_URL || process.env.SUPABASE_DB_URL,
+    
+    host: process.env.DB_HOST || process.env.SUPABASE_HOST,
+    port: parseInt(process.env.DB_PORT || process.env.SUPABASE_PORT) || 5432,
+    name: process.env.DB_NAME || process.env.SUPABASE_DB_NAME || 'postgres',
+    username: process.env.DB_USERNAME || process.env.SUPABASE_USER || 'postgres',
+    password: process.env.DB_PASSWORD || process.env.SUPABASE_PASSWORD,
+    
+    ssl: true, // Always use SSL in production
+    poolSize: parseInt(process.env.DB_POOL_SIZE) || (process.env.VERCEL ? 1 : 10),
+    connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 10000,
+    
+    // Production-specific settings
+    schema: process.env.DB_SCHEMA || 'public',
+    searchPath: process.env.DB_SEARCH_PATH || 'public',
     logging: false
   },
   
@@ -30,25 +40,27 @@ module.exports = {
   },
   
   security: {
-    jwtSecret: process.env.JWT_SECRET,
-    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '8h',
-    bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS) || 14,
-    rateLimitWindow: 900000, // 15 minutes
-    rateLimitMax: 100,
-    corsOrigins: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : []
+    jwtSecret: process.env.JWT_SECRET, // Must be set in production
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS) || 12,
+    rateLimitWindow: parseInt(process.env.RATE_LIMIT_WINDOW) || 900000,
+    rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX) || 100,
+    corsOrigins: process.env.CORS_ORIGINS ? 
+      process.env.CORS_ORIGINS.split(',') : 
+      ['https://yourdomain.com']
   },
   
   logging: {
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL || 'warn', // Less verbose in production
     format: 'json',
     auditEnabled: true,
     auditRetentionDays: parseInt(process.env.AUDIT_RETENTION_DAYS) || 2555
   },
   
   monitoring: {
-    healthCheckInterval: 30000,
+    healthCheckInterval: parseInt(process.env.HEALTH_CHECK_INTERVAL) || 30000,
     metricsEnabled: true,
-    tracingEnabled: true,
+    tracingEnabled: process.env.TRACING_ENABLED === 'true',
     alertingEnabled: true
   },
   
@@ -57,10 +69,50 @@ module.exports = {
     detailedErrorMessages: false,
     hotReload: false,
     debugMode: false,
-    performanceOptimized: true
+    performanceOptimized: true,
+    accountOpening: true,
+    loanProcessing: true,
+    kycVerification: true,
+    auditLogging: true,
+    rateLimiting: true,
+    cors: true,
+    helmet: true,
+    compression: true
+  },
+  
+  // Supabase integration
+  supabase: {
+    url: process.env.SUPABASE_URL,
+    anonKey: process.env.SUPABASE_ANON_KEY,
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    schema: 'public'
   },
   
   externalServices: {
+    googleTranslate: {
+      apiKey: process.env.GOOGLE_TRANSLATE_API_KEY,
+      enabled: !!process.env.GOOGLE_TRANSLATE_API_KEY
+    },
+    
+    aws: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_REGION || 'us-east-1'
+    },
+
+    email: {
+      smtp: {
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT) || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        },
+        from: process.env.SMTP_FROM || 'Banking System <noreply@yourdomain.com>'
+      }
+    },
+    
     creditBureau: {
       cibil: {
         baseUrl: process.env.CIBIL_API_URL,

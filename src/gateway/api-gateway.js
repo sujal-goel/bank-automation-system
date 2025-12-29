@@ -9,7 +9,7 @@ const router = express.Router();
 // Security middleware
 router.use(helmet());
 router.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000','http://localhost:3001'],
   credentials: true
 }));
 
@@ -77,7 +77,8 @@ const authRoutes = require('../modules/auth/routes');
 router.use('/auth', authRoutes);
 
 // Apply general rate limiting to all protected routes
-router.use(generalRateLimit);
+// router.use(generalRateLimit);
+
 
 // Import banking modules
 const { AccountOpeningModule } = require('../modules/account-opening');

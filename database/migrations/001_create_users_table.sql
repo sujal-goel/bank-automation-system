@@ -188,7 +188,7 @@ INSERT INTO users (
 SELECT 
     'admin@bank.com',
     'admin',
-    '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- password: Admin@123
+    '$2b$10$NgBFk85bNNrFBip3FfMkAOI7o4hcmgS6kyfvEmjem4Le.BEMERHk2', -- password: Admin@123
     'System',
     'Administrator',
     '+1234567890',
@@ -220,7 +220,7 @@ INSERT INTO users (
 SELECT 
     'officer@bank.com',
     'bank_officer',
-    '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- password: Officer@123
+    '$2b$10$Ep9ucX55VKod1jooeKvL2eY8uyh9JvYeWuaCH9XMxvtJsTgpnygjS', -- password: Officer@123
     'John',
     'Officer',
     '+1234567891',
