@@ -1,15 +1,58 @@
 {
   "version": 2,
   "name": "banking-process-automation",
-
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/next",
+      "config": {
+        "distDir": ".next"
+      }
+    },
+    {
+      "src": "src/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    }
+  ],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/api/backend/(.*)",
       "dest": "/src/index.js"
     },
     {
-      "src": "/(.*)",
+      "src": "/health",
       "dest": "/src/index.js"
+    },
+    {
+      "src": "/services",
+      "dest": "/src/index.js"
+    },
+    {
+      "src": "/circuit-breakers",
+      "dest": "/src/index.js"
+    },
+    {
+      "src": "/api-docs",
+      "dest": "/src/index.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/frontend/api/$1"
+    },
+    {
+      "src": "/(_next/static/.*)",
+      "dest": "/frontend/_next/static/$1"
+    },
+    {
+      "src": "/(favicon.ico|robots.txt|sitemap.xml)",
+      "dest": "/frontend/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/$1"
     }
   ],
   "env": {
@@ -17,11 +60,54 @@
   },
   "functions": {
     "src/index.js": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "memory": 512
     }
   },
   "regions": ["iad1"],
   "github": {
     "silent": true
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/backend/:path*",
+      "destination": "/src/index.js"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/backend/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ]
 }
